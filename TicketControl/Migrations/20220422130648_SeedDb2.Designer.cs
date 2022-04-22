@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TicketControl.Data;
 
@@ -11,9 +12,10 @@ using TicketControl.Data;
 namespace TicketControl.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220422130648_SeedDb2")]
+    partial class SeedDb2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,10 +37,15 @@ namespace TicketControl.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("TicketId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Description")
+                    b.HasIndex("Id")
                         .IsUnique();
+
+                    b.HasIndex("TicketId");
 
                     b.ToTable("Entrances");
                 });
@@ -51,7 +58,7 @@ namespace TicketControl.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime?>("Date")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Document")
@@ -74,16 +81,23 @@ namespace TicketControl.Migrations
 
                     b.HasIndex("EntranceId");
 
-                    b.HasIndex("Id", "EntranceId")
+                    b.HasIndex("Id")
                         .IsUnique();
 
                     b.ToTable("Tickets");
                 });
 
+            modelBuilder.Entity("TicketControl.Data.Entities.Entrance", b =>
+                {
+                    b.HasOne("TicketControl.Data.Entities.Ticket", null)
+                        .WithMany("Entrances")
+                        .HasForeignKey("TicketId");
+                });
+
             modelBuilder.Entity("TicketControl.Data.Entities.Ticket", b =>
                 {
                     b.HasOne("TicketControl.Data.Entities.Entrance", "Entrance")
-                        .WithMany("Ticket")
+                        .WithMany()
                         .HasForeignKey("EntranceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -91,9 +105,9 @@ namespace TicketControl.Migrations
                     b.Navigation("Entrance");
                 });
 
-            modelBuilder.Entity("TicketControl.Data.Entities.Entrance", b =>
+            modelBuilder.Entity("TicketControl.Data.Entities.Ticket", b =>
                 {
-                    b.Navigation("Ticket");
+                    b.Navigation("Entrances");
                 });
 #pragma warning restore 612, 618
         }
